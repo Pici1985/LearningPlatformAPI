@@ -8,5 +8,8 @@ namespace LearningPlatformAPI.Data
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         public DbSet<Person> Person { get; set; }
+
+
+
     }
 }
