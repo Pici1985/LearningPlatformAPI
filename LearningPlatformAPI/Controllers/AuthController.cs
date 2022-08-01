@@ -46,6 +46,37 @@ namespace LearningPlatformAPI.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { UserID = person.UserId});
-        }        
+        }
+
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login(string email, string password) {
+
+            if (_context.CheckCredentials(email, password))
+            {           
+                return Ok($"Login successful! With credentials { email } and { password }");
+            }
+
+            //with bool
+            //if (_context.CheckCredentials(email, password))
+            //{           
+            //    return Ok($"Login successful! With {email} and {password}");
+            //}
+            
+            if (email != "email")
+            {
+                return BadRequest("Login failed!");
+                //return BadRequest("Login failed!");
+
+            }
+            
+            if (password != "password")
+            {
+                return BadRequest("Login failed!");
+                //return BadRequest("Login failed!");
+            }
+
+            return BadRequest();
+        }
     }
 }
