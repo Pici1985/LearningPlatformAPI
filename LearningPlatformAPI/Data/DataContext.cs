@@ -11,27 +11,24 @@ namespace LearningPlatformAPI.Data
 
         public void WriteStuff()
         {
-            Console.WriteLine("Anyad");
+            Console.WriteLine("test");
         }
 
-        // IQueryable<Person> // bool
-        public bool CheckCredentials(string email, string password)
+        
+        public Person? CheckCredentials(string email, string password)
         {
-            var credentials = from p in Person
-                              where p.Email == email && p.Password == password
-                              select p.FirstName;
-
-            if (credentials.Any(email => (bool)email.Contains(email)) &&
-                credentials.Any(password => (bool)password.Contains(password))
-               )
-            {
-                //return (IQueryable<Person>)credentials;
-                return true;
-            }
-            else 
-            {
-                return false;
-            }
+            return (from p in Person
+                    where p.Email == email && p.Password == password
+                    select p).FirstOrDefault();
+            
+            // if I would return a bool this would be the implementation but that's not a good practice
+            //if(credentials != null)
+            //{
+            //    //return (IQueryable<Person>)credentials;
+            //    return true;
+            //}
+            //return false;      
+            
 
         }
 

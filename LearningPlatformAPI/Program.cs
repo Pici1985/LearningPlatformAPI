@@ -1,11 +1,15 @@
 global using LearningPlatformAPI.Data;
 global using Microsoft.EntityFrameworkCore;
+using LearningPlatformAPI.ActionFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<SampleActionFilter>();
+
 builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));

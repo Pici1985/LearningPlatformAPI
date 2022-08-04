@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using LearningPlatformAPI.Data;
+﻿using LearningPlatformAPI.ActionFilters;
 using LearningPlatformAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,20 +18,9 @@ namespace LearningPlatformAPI.Controllers
             _context = context;
         }
 
-        //[HttpGet]
-        //[Route("signup")]
-        //public async Task<IActionResult> GetSignups()
-        //{
-        //    if (_context.Person == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return Ok("Login page would sit here");
-        //}
-
         [HttpPost]
         [Route("signup")]
-        public async Task<IActionResult> PostPerson([FromBody]Person person)
+        public async Task<IActionResult> PostPerson([FromBody] Person person)
         {
             if (_context.Person == null)
             {
@@ -45,16 +29,42 @@ namespace LearningPlatformAPI.Controllers
             _context.Person.Add(person);
             await _context.SaveChangesAsync();
 
-            return Ok(new { UserID = person.UserId});
+            return Ok(new { UserID = person.UserId });
         }
-
+        
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login(string email, string password) {
+        public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
+        {
+            var person = _context.CheckCredentials(loginModel.Email, loginModel.Password);
 
-            if (_context.CheckCredentials(email, password))
-            {           
-                return Ok($"Login successful! With credentials { email } and { password }");
+            if (person != null)
+            {
+                //generate token 
+                Guid token = Guid.NewGuid();
+                                                
+                // get the user from the db with the passed in credentials
+                // save token against a user in db
+                person.Token = token;                
+                _context.Person.Update(person);
+                await _context.SaveChangesAsync();
+
+                // this another way to build a string
+                //var sb = new StringBuilder();
+                //    sb.Append("hello");
+                //    sb.Append(person.FirstName);
+                //    sb.Append("Login successful! Token created:");
+                //    sb.Append(token);
+
+                var loginSuccess = new LoginSuccess() 
+                { 
+                    FirstName = person.FirstName,
+                    Token = token
+                };
+
+                //return Ok($"Hello {person.FirstName} Login successful! Token created: {token}");
+                return Ok(loginSuccess);
+
             }
 
             //with bool
@@ -62,15 +72,15 @@ namespace LearningPlatformAPI.Controllers
             //{           
             //    return Ok($"Login successful! With {email} and {password}");
             //}
-            
-            if (email != "email")
+
+            if (loginModel.Email != "email")
             {
                 return BadRequest("Login failed!");
                 //return BadRequest("Login failed!");
 
             }
-            
-            if (password != "password")
+
+            if (loginModel.Password != "password")
             {
                 return BadRequest("Login failed!");
                 //return BadRequest("Login failed!");

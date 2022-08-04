@@ -14,6 +14,6 @@ namespace LearningPlatformAPI.Models
         public int Age { get; set; }    
         public string? Occupation { get; set; } 
         public DateTime DateOfRegistration { get; set; }
-
+        public Guid? Token { get; set; }
     }
 }

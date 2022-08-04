@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LearningPlatformAPI.Data;
 using LearningPlatformAPI.Models;
+using LearningPlatformAPI.ActionFilters;
 
 namespace LearningPlatformAPI.Controllers
 {
@@ -22,6 +23,7 @@ namespace LearningPlatformAPI.Controllers
         }
 
         // GET: api/Person
+        [ServiceFilter(typeof(SampleActionFilter))]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Person>>> GetPerson()
         {
@@ -33,6 +35,7 @@ namespace LearningPlatformAPI.Controllers
         }
 
         // GET: api/Person/5
+        //[this where my new actionfilter would go]
         [HttpGet("{id}")]
         public async Task<ActionResult<Person>> GetPerson(int id)
         {
