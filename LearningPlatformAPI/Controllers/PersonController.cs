@@ -36,7 +36,8 @@ namespace LearningPlatformAPI.Controllers
 
         // GET: api/Person/5
         //[this where my new actionfilter would go]
-        [HttpGet("{id}")]
+        [ServiceFilter(typeof(SampleActionFilter))]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<Person>> GetPerson(int id)
         {
           if (_context.Person == null)

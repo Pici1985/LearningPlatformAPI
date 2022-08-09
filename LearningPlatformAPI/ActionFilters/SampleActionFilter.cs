@@ -21,8 +21,24 @@ namespace LearningPlatformAPI.ActionFilters
                                      where dt.Token.ToString() == (string)token
                                      select dt).FirstOrDefault();
 
-                if (doesTokenExist != null)
+
+                if (context.ActionArguments.TryGetValue("Id", out var value))
                 {
+                    var currentToken = (from ct in dbContext.Person
+                                        where ct.UserId == (int)value
+                                        select ct.Token).FirstOrDefault();
+
+
+                    if (doesTokenExist?.Token == currentToken)
+                    {
+                        await next();
+                    }
+                    context.Result = new UnauthorizedResult();
+                    return;
+                }
+
+                if (doesTokenExist != null)
+                {           
                     await next();
                 } 
             }
