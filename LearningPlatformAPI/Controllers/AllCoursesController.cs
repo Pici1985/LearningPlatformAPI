@@ -30,14 +30,7 @@ namespace LearningPlatformAPI.Controllers
                 return BadRequest();
             }
             return Ok(courses);
-        }
-
-        //// GET api/<AllCoursesController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
+        }     
 
         // POST api/<AllCoursesController>
         [HttpPost]
