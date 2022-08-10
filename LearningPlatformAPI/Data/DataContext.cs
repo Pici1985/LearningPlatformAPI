@@ -9,6 +9,8 @@ namespace LearningPlatformAPI.Data
 
         public DbSet<Person> Person { get; set; }
         public DbSet<PersonLoggedInOnDate> PersonLoggedInOnDate { get; set; }
+        public DbSet<AllCourses> AllCourses { get; set; }
+        public DbSet<MyCourses> MyCourses { get; set; }
         
         
         public Person? CheckCredentials(string email, string password)

@@ -83,25 +83,37 @@ namespace LearningPlatformAPI.Controllers
                 //get dates from db 
                 var dates = (from d in _context.PersonLoggedInOnDate
                             where d.UserID == person.UserId
-                            orderby d.DateTime descending
+                            orderby d.DateTime ascending
                             select d.DateTime.Date).Distinct().ToList();
 
                 //get number of days in current month for iteration
                 var ThisMonth = DateTime.Now.Month;
                 var ThisYear = DateTime.Now.Year;
-
                 int daysInMonth = DateTime.DaysInMonth(ThisYear, ThisMonth);
-                //Console.WriteLine(daysInMonth);
+                Console.WriteLine(daysInMonth);
+                Console.WriteLine();
+
+                // instead of days in month need nr of days registered
+                //var today = DateTime.Now;
+                //var dateOfFirstRegistration = dates.Min();
+                //int daysRegistered = (int)Math.Floor((today - dateOfFirstRegistration).TotalDays);
+                //Console.WriteLine(daysRegistered);
 
                 //create lists for storing stuff
                 List<int> list = new List<int>(){ };
                 List<int> binaryList = new List<int>(){ };
 
+
+                //this is not quite right (this is actually a big fuckup)
                 foreach (var row in dates)
                 {
                     list.Add(row.Day);
-                    //Console.WriteLine(list);
+                    Console.WriteLine(row.Day);
                 }
+                    Console.WriteLine();
+
+                //this is not quite right (this is actually a big fuckup)
+
 
                 // create a list of 1s and 0s
                 for (var k = 1; k < daysInMonth; ++k) {
@@ -114,6 +126,8 @@ namespace LearningPlatformAPI.Controllers
                         binaryList.Add(0);
                     }
                 }
+
+                //binaryList.Reverse();
 
                 foreach (var i in binaryList)
                 {
@@ -150,17 +164,18 @@ namespace LearningPlatformAPI.Controllers
                         {
                             currentStreak++;
                         }
-                        else 
+                        else
                         {
                             currentStreak = 0;
                         }
-                        if (currentStreak > maxStreak) 
+                        if (currentStreak > maxStreak)
                         {
                             maxStreak = currentStreak;
                         }
                     };
 
                     return maxStreak;
+                    //return currentStreak;
                 }
 
                 int longestStreak = Streak(binaryList);
