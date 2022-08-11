@@ -49,6 +49,8 @@ namespace LearningPlatformAPI.Controllers
                                where c.CourseId == courseid 
                                select c);
 
+            // this is the new branch
+
             //query to check if user exists
             //var userExists = (from u in _context.Person
             //                 where u.UserId == userid
