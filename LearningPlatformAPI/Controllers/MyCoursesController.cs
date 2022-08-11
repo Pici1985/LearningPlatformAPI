@@ -24,13 +24,15 @@ namespace LearningPlatformAPI.Controllers
                              where myc.UserID == id
                              select myc);
 
-            //var mycourses = await _context.MyCourses.FindAsync();
-
-            if (mycourses == null)
+            foreach (var course in mycourses)
             {
-                return BadRequest();
-            }
-            return Ok(mycourses);
+                //Console.WriteLine(course.UserID);
+                if (course.CourseID == id)
+                {
+                    return Ok(mycourses);
+                }
+            }                     
+            return BadRequest();
         }
 
         //// POST api/<MyCoursesController>

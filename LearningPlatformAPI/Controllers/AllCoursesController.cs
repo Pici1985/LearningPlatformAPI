@@ -10,11 +10,13 @@ namespace LearningPlatformAPI.Controllers
     public class AllCoursesController : ControllerBase
     {
         private readonly DataContext _context;
-
+        
         public AllCoursesController(DataContext context)
         {
+            // this may not be right at all
             _context = context;
         }
+
         // GET: api/<AllCoursesController>
         [HttpGet]
         public async Task<ActionResult<AllCourses>> GetAllCourses()
@@ -25,11 +27,11 @@ namespace LearningPlatformAPI.Controllers
 
             var courses = await _context.AllCourses.ToListAsync();
 
-            if (courses == null)
+            if (courses != null)
             {
-                return BadRequest();
+                return Ok(courses);
             }
-            return Ok(courses);
+            return BadRequest();
         }     
 
         // POST api/<AllCoursesController>
@@ -42,12 +44,41 @@ namespace LearningPlatformAPI.Controllers
             int courseid = CourseID;
             int userid = id;
 
+            //query to check if a course exists
+            var courseExists = (from c in _context.AllCourses
+                               where c.CourseId == courseid 
+                               select c);
+
+            //query to check if user exists
+            //var userExists = (from u in _context.Person
+            //                 where u.UserId == userid
+            //                 select new { u });
+
+            // check if course id exists 
+            foreach (var course in courseExists)
+            {
+                if (course != null)
+                {
+                    // check if user id exists      
+                    //foreach (var user in userExists)
+                    //{
+                    //    if (user != null) 
+                    //    {
+                    //        return BadRequest();
+                    //    }
+                    //}
+                    //Console.WriteLine($"{course.CourseTitle} exists {user.FirstName}{user.LastName} exists");
+                    Console.WriteLine($"{course.CourseTitle} exists");
+                    return Ok(course.CourseTitle);   
+                }
+                return BadRequest();
+            }
+            return BadRequest();
+
+            // check if user is already enrolled to course
             // add a new line to mycourses table with userid courseid 
-            // check if course id exists
-            // check if user id exists
             // if this combination already exists give back an error
 
-            return Ok($" This User: {userid} wants to enroll in this course:{courseid}");
         }
 
         //// PUT api/<AllCoursesController>/5
