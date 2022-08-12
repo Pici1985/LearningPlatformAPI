@@ -1,5 +1,6 @@
 ﻿using LearningPlatformAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -32,55 +33,58 @@ namespace LearningPlatformAPI.Controllers
                 return Ok(courses);
             }
             return BadRequest();
-        }     
+        }
 
         // POST api/<AllCoursesController>
         [HttpPost]
         [Route("enroll/{id}")]
         public async Task<ActionResult<AllCourses>> Post([FromRouteAttribute] int id, int CourseID)
         {
-            //await _context.AllCourses.ToListAsync();
-
             int courseid = CourseID;
             int userid = id;
 
-            //query to check if a course exists
-            var courseExists = (from c in _context.AllCourses
-                               where c.CourseId == courseid 
-                               select c);
+            //query to check if an enrollment already exists
+            var userEnrolledOnCourse = (from c in _context.MyCourses
+                                        where c.CourseID == courseid && c.UserID == userid
+                                        select c);
 
-            // this is the new branch
-
-            //query to check if user exists
-            //var userExists = (from u in _context.Person
-            //                 where u.UserId == userid
-            //                 select new { u });
-
-            // check if course id exists 
-            foreach (var course in courseExists)
+            //check if user exists
+            if (_context.Person.Any(i => i.UserId == userid))
             {
-                if (course != null)
+                //check if course exists
+                if (_context.AllCourses.Any(c => c.CourseId == courseid))
                 {
-                    // check if user id exists      
-                    //foreach (var user in userExists)
-                    //{
-                    //    if (user != null) 
-                    //    {
-                    //        return BadRequest();
-                    //    }
-                    //}
-                    //Console.WriteLine($"{course.CourseTitle} exists {user.FirstName}{user.LastName} exists");
-                    Console.WriteLine($"{course.CourseTitle} exists");
-                    return Ok(course.CourseTitle);   
+                    foreach (var course in userEnrolledOnCourse)
+                    {   
+                        //check if enrollment already exists
+                        if (userEnrolledOnCourse != null)
+                        {
+                            Console.WriteLine($"User: {course.UserID} already enrolled to Course: {course.ID}");
+                            return Ok("already enrolled");
+                        }
+                    }
                 }
-                return BadRequest();
+                else 
+                { 
+                    return Ok($"course: {courseid} not found");                
+                }
             }
-            return BadRequest();
+            else 
+            { 
+                return Ok($"person: {userid} not found");            
+            }
 
-            // check if user is already enrolled to course
-            // add a new line to mycourses table with userid courseid 
-            // if this combination already exists give back an error
-
+            //creat new enrollment with given user on given course
+            MyCourses newCourse = new MyCourses
+            {
+                CourseID = courseid,
+                UserID = userid,
+                Progress = 0,
+                Finished = false
+            };
+            _context.MyCourses.Add(newCourse);
+            await _context.SaveChangesAsync();
+            return Ok($"user: {userid} enrolled on course: {courseid}");
         }
 
         //// PUT api/<AllCoursesController>/5
