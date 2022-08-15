@@ -78,7 +78,7 @@ namespace LearningPlatformAPI.Controllers
                     Token = token
                 };
                 
-                //------------------------------------- this is to calculate the streak -----------------------------//
+                //------------------------------------- this is to calculate the LongestStreak -----------------------------//
 
                 //get dates from db 
                 var dates = (from d in _context.PersonLoggedInOnDate
@@ -90,8 +90,8 @@ namespace LearningPlatformAPI.Controllers
                 var ThisMonth = DateTime.Now.Month;
                 var ThisYear = DateTime.Now.Year;
                 int daysInMonth = DateTime.DaysInMonth(ThisYear, ThisMonth);
-                Console.WriteLine(daysInMonth);
-                Console.WriteLine();
+                //Console.WriteLine(daysInMonth);
+                //Console.WriteLine();
 
                 // instead of days in month need nr of days registered
                 //var today = DateTime.Now;
@@ -108,9 +108,9 @@ namespace LearningPlatformAPI.Controllers
                 foreach (var row in dates)
                 {
                     list.Add(row.Day);
-                    Console.WriteLine(row.Day);
+                    //Console.WriteLine(row.Day);
                 }
-                    Console.WriteLine();
+                    //Console.WriteLine();
 
                 //this is not quite right (this is actually a big fuckup)
 
@@ -129,10 +129,10 @@ namespace LearningPlatformAPI.Controllers
 
                 //binaryList.Reverse();
 
-                foreach (var i in binaryList)
-                {
-                    Console.WriteLine(i);
-                }
+                //foreach (var i in binaryList)
+                //{
+                //    Console.WriteLine(i);
+                //}
 
                 // this formula IS not right
                 //static int Streak(List<int> binaryList)
@@ -180,10 +180,56 @@ namespace LearningPlatformAPI.Controllers
 
                 int longestStreak = Streak(binaryList);
 
-                //----------------------------------- this is to calcualte the streak ------------------------------------//
+                //----------------------------------- this is to calcualte the LongestStreak ------------------------------------//
 
+                //----------------------------------- this is to calculate the CurrentStreak ------------------------------------//
 
-                return Ok($"Successful login: {loginSuccess.FirstName}! Your longest streak is {longestStreak} ");
+               
+                List<int> ints = new List<int> { };
+
+                foreach (var d in dates)
+                {
+
+                    var dShort = d.Date;
+                    var ds = dShort.ToString("yyyy-MM-dd h:mm tt");
+                    var cut = ds.Remove(10);
+                    var trimmed = cut.Replace("-", "");         
+
+                    int num = int.Parse(trimmed);
+
+                    ints.Add(num);
+
+                }
+
+                ints.Reverse();
+
+                int currentStreak = 0;
+
+                //itt van valami kanya
+                for (var i = 0; i < ints.Count; i++)
+                {
+                    if (ints[i] - ints[i + 1] == 1)
+                    {
+                        currentStreak++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                foreach (var i in ints)
+                {
+                    Console.WriteLine(i);
+                }
+
+                var actualStreak = currentStreak + 1;
+
+                //Console.WriteLine();
+                //Console.WriteLine(actualStreak);
+                //----------------------------------- this is to calculate the CurrentStreak ------------------------------------//
+
+                return Ok($"Successful login: {loginSuccess.FirstName}! Your longest streak is {longestStreak} and your current streak is {actualStreak}");
 
             }
                         
