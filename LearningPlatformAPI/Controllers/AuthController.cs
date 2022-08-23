@@ -18,6 +18,22 @@ namespace LearningPlatformAPI.Controllers
             _context = context;
         }
 
+        // TEST endpoint to check if db connection works
+
+        //[HttpGet]
+        //[Route("events")]
+        //public async Task<ActionResult<UserTriggeredEvent>> GetEvents()
+        //{
+        //    var events = await _context.UserTriggeredEvent.ToListAsync();
+
+        //    if (events != null)
+        //    {
+        //        return Ok(events);
+        //    }
+        //    return BadRequest();
+        //}
+
+
         [HttpPost]
         [Route("signup")]
         public async Task<IActionResult> PostPerson([FromBody] Person person)
@@ -49,17 +65,30 @@ namespace LearningPlatformAPI.Controllers
 
                 DateTime date = DateTime.Now;
 
-                PersonLoggedInOnDate passin = new PersonLoggedInOnDate()
+                // this bit is redundant------------------------------------------
+
+                //PersonLoggedInOnDate passin = new PersonLoggedInOnDate()
+                //{
+                //    UserID = person.UserId,
+                //    DateTime = date
+                //};
+                
+                // this bit is redundant------------------------------------------
+
+                UserTriggeredEvent passIn = new UserTriggeredEvent()
                 {
                     UserID = person.UserId,
-                    DateTime = date
-                };
+                    EventID = 1,
+                    TimeStamp = date,
+                    Detail = null
+                 };
 
                 // get the user from the db with the passed in credentials
                 // save token against a user in db
                 person.Token = token;                
                 _context.Person.Update(person);
-                _context.PersonLoggedInOnDate.Add(passin);
+                //_context.PersonLoggedInOnDate.Add(passin);
+                _context.UserTriggeredEvent.Add(passIn);
 
                 await _context.SaveChangesAsync();       
 
@@ -81,10 +110,10 @@ namespace LearningPlatformAPI.Controllers
                 //------------------------------------- this is to calculate the CurrentStreak -----------------------------//
 
                 //get distinct dates from db 
-                var dates = (from d in _context.PersonLoggedInOnDate
-                            where d.UserID == person.UserId
-                            orderby d.DateTime ascending
-                            select d.DateTime.Date).Distinct().ToList();
+                var dates = (from d in _context.UserTriggeredEvent
+                             where d.UserID == person.UserId
+                            orderby d.TimeStamp ascending
+                            select d.TimeStamp.Date).Distinct().ToList();
                 
                 // create a list of the actual dates logged in                                              
                 List<DateTime> actualDates = new List<DateTime>(){ };
@@ -92,6 +121,7 @@ namespace LearningPlatformAPI.Controllers
                 foreach (var row in dates)
                 {
                     actualDates.Add(row);
+                    Console.WriteLine(row);
                 }              
 
                 // get first and last login date
@@ -147,6 +177,7 @@ namespace LearningPlatformAPI.Controllers
                     }
 
                 }
+
                 return Ok($"Successful login: {loginSuccess.FirstName}! Current streak: {currentStreak}");
             }
                 // Calculate Current streak ------------------- useful until here ----------------------------------------------------
@@ -215,5 +246,7 @@ namespace LearningPlatformAPI.Controllers
 
             return BadRequest();
         }
+
+
     }
 }

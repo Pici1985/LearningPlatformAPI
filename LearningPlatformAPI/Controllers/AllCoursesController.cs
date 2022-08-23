@@ -101,6 +101,7 @@ namespace LearningPlatformAPI.Controllers
             {
                 return validateResult;
             }
+            
             //create new enrollment with given user on given course
             MyCourses newCourse = new MyCourses
             {
@@ -109,11 +110,16 @@ namespace LearningPlatformAPI.Controllers
                 Progress = 0,
                 Finished = false
             };
+
             _context.MyCourses.Add(newCourse);
             await _context.SaveChangesAsync();
+
+            // raise an ENROLLED EVENT here!!!! 
+
             return Ok($"user: {request.UserId} enrolled on course: {request.CourseId}");
         }
 
+        // Validator function t osee if user has already enrolled to given course
         private ObjectResult Validate(CreateEnrollRequest request)
         {
             //check if user exists
