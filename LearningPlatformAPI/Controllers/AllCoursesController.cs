@@ -32,66 +32,19 @@ namespace LearningPlatformAPI.Controllers
             return BadRequest();
         }
 
-        //my solution 
-
-        //POST api/<AllCoursesController>
-        //[HttpPost]
-        //[Route("enroll/{id}")]
-        //public async Task<ActionResult<AllCourses>> Post([FromRouteAttribute] int id, int CourseID)
-        //{
-        //    int courseid = CourseID;
-        //    int userid = id;
-
-        //    //query to check if an enrollment already exists
-        //    var userEnrolledOnCourse = (from c in _context.MyCourses
-        //                                where c.CourseID == courseid && c.UserID == userid
-        //                                select c);
-
-
-        //    //check if user exists
-        //    if (_context.Person.Any(i => i.UserId == userid))
-        //    {
-        //        //check if course exists
-        //        if (_context.AllCourses.Any(c => c.CourseId == courseid))
-        //        {
-        //            foreach (var course in userEnrolledOnCourse)
-        //            {
-        //                //check if enrollment already exists
-        //                if (userEnrolledOnCourse != null)
-        //                {
-        //                    Console.WriteLine($"User: {course.UserID} already enrolled to Course: {course.ID}");
-        //                    return Ok("already enrolled");
-        //                }
-        //            }
-        //        }
-        //        else
-        //        {
-        //            return Ok($"course: {courseid} not found");
-        //        }
-        //    }
-        //    else
-        //    {
-        //        return Ok($"person: {userid} not found");
-        //    }
-
-        //    //create new enrollment with given user on given course
-        //    MyCourses newCourse = new MyCourses
-        //    {
-        //        CourseID = courseid,
-        //        UserID = userid,
-        //        Progress = 0,
-        //        Finished = false
-        //    };
-        //    _context.MyCourses.Add(newCourse);
-        //    await _context.SaveChangesAsync();
-        //    return Ok($"user: {userid} enrolled on course: {courseid}");
-        //}
-
-        //until here
+        [HttpGet]
+        [Route("available/{id}")]
+        public async Task<ActionResult<AllCourses>> GetAvailableCourses(int id)
+        {
+            // need to check if userid exists
+            // Query to get available courses (all courses - mycourses) 
+            // return an object with the difference
+            return Ok($"all available courses for user {id}");
+        }
 
         //refactored solution
 
-       [HttpPost]
+        [HttpPost]
         [Route("enroll")]
         public async Task<IActionResult> Post([FromBody] CreateEnrollRequest request)
         {
@@ -107,14 +60,10 @@ namespace LearningPlatformAPI.Controllers
             {
                 CourseID = request.CourseId,
                 UserID = request.UserId,
-                Progress = 0,
-                Finished = false
             };
 
             _context.MyCourses.Add(newCourse);
-            await _context.SaveChangesAsync();
-
-            // raise an ENROLLED EVENT here!!!! 
+            await _context.SaveChangesAsync();          
 
             return Ok($"user: {request.UserId} enrolled on course: {request.CourseId}");
         }

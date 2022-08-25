@@ -27,7 +27,7 @@ namespace LearningPlatformAPI.Controllers
             foreach (var course in mycourses)
             {
                 //Console.WriteLine(course.UserID);
-                if (course.CourseID == id)
+                if (course.UserID == id)
                 {
                     return Ok(mycourses);
                 }

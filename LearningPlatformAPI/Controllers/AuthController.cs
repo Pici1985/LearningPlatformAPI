@@ -121,6 +121,7 @@ namespace LearningPlatformAPI.Controllers
                 foreach (var row in dates)
                 {
                     actualDates.Add(row);
+                    //Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine(row);
                 }              
 
