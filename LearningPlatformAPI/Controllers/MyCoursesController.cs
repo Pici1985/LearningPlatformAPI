@@ -17,7 +17,7 @@ namespace LearningPlatformAPI.Controllers
         }
        
         // GET api/<MyCoursesController>/5
-        [HttpGet("{id:int}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<MyCourses>> GetMyCourses(int id)
         {
             var mycourses = (from myc in _context.MyCourses

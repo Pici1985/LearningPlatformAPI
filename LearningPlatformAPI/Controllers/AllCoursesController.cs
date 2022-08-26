@@ -37,7 +37,7 @@ namespace LearningPlatformAPI.Controllers
         public async Task<ActionResult<AllCourses>> GetAvailableCourses(int id)
         {
             // need to check if userid exists
-            // Query to get available courses (all courses - mycourses) 
+            // Query to get available courses (all courses - mycourses) left outer join return where mycourses.ID == null 
             // return an object with the difference
             return Ok($"all available courses for user {id}");
         }
