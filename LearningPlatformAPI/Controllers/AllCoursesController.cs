@@ -33,13 +33,34 @@ namespace LearningPlatformAPI.Controllers
         }
 
         [HttpGet]
-        [Route("available/{id}")]
-        public async Task<ActionResult<AllCourses>> GetAvailableCourses(int id)
+        [Route("available/{userid}")]
+        public async Task<IActionResult> GetAvailableCourses(int userid)
         {
             // need to check if userid exists
-            // Query to get available courses (all courses - mycourses) left outer join return where mycourses.ID == null 
-            // return an object with the difference
-            return Ok($"all available courses for user {id}");
+            if (_context.Person.Any(i => i.UserId == userid))
+            {
+                //this is a working solution - useless
+
+
+                var allcourses = _context.AllCourses.ToList();
+
+                var allCoursesIds = (from a in allcourses
+                                     select a.CourseId).ToList();
+
+                var enrolledCoursesIds = (from m in _context.MyCourses
+                                          where m.UserID == userid
+                                          select m.CourseID).ToList();
+
+                var availableCourses = allCoursesIds.Except(enrolledCoursesIds).ToList();
+
+                var courses = (from m in allcourses
+                               join av in availableCourses on m.CourseId equals av
+                               select m).ToList();
+
+                // return an object result
+                return Ok(courses);
+            }
+            return BadRequest($"User NR {userid} doesn't exist!!");
         }
 
         //refactored solution

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LearningPlatformAPI.Enums;
 
 namespace LearningPlatformAPI.Controllers
 {
@@ -18,7 +19,7 @@ namespace LearningPlatformAPI.Controllers
 
         [HttpPost]
         [Route("start")]
-        public async Task<IActionResult> Start([FromBody]CreateStartRequest request)
+        public async Task<IActionResult> Start([FromBody]CreateSectionRequest request)
         {
             // check if userid exists
             if (_context.Person.Any(i => i.UserId == request.UserId))
@@ -28,7 +29,7 @@ namespace LearningPlatformAPI.Controllers
                 {
                     // Query
                     var someEvent = (from e in _context.UserTriggeredEvent
-                                    where e.UserID == request.UserId && e.EventID == 3 && e.Detail == $"CourseSectionID = {request.CourseSectionId}"
+                                    where e.UserID == request.UserId && e.EventID == (int)EventsEnum.StartSection && e.Detail == $"{request.CourseSectionId}"
                                     select e).FirstOrDefault();
 
                     // check if event has happened already
@@ -38,9 +39,9 @@ namespace LearningPlatformAPI.Controllers
                         var newStart = new UserTriggeredEvent
                         {
                             UserID = request.UserId,
-                            EventID = 3,
+                            EventID = (int)EventsEnum.StartSection,
                             TimeStamp = DateTime.Now,
-                            Detail = $"CourseSectionID = {request.CourseSectionId}"
+                            Detail = $"{request.CourseSectionId}"
                         };
 
                         _context.UserTriggeredEvent.Add(newStart);
@@ -58,7 +59,7 @@ namespace LearningPlatformAPI.Controllers
 
         [HttpPost]
         [Route("finish")]
-        public async Task<IActionResult> Finish([FromBody] CreateStartRequest request)
+        public async Task<IActionResult> Finish([FromBody] CreateSectionRequest request)
         {
             // check if user exists
             if (_context.Person.Any(i => i.UserId == request.UserId))
@@ -69,8 +70,8 @@ namespace LearningPlatformAPI.Controllers
 
                     var doesEventExist = (from d in _context.UserTriggeredEvent
                                           where d.UserID == request.UserId &&
-                                                d.EventID == 3 &&
-                                                d.Detail == $"CourseSectionID = {request.CourseSectionId}"
+                                                d.EventID == (int)EventsEnum.StartSection &&
+                                                d.Detail == $"{request.CourseSectionId}"
                                           select d).FirstOrDefault();
 
                     // check if event started
@@ -78,8 +79,8 @@ namespace LearningPlatformAPI.Controllers
                     {
                         var hasEventBeenFinished = (from d in _context.UserTriggeredEvent
                                               where d.UserID == request.UserId &&
-                                                    d.EventID == 4 &&
-                                                    d.Detail == $"CourseSectionID = {request.CourseSectionId}"
+                                                    d.EventID == (int)EventsEnum.FinishSection &&
+                                                    d.Detail == $"{request.CourseSectionId}"
                                               select d).FirstOrDefault();
 
                         if (hasEventBeenFinished == null) 
@@ -88,9 +89,9 @@ namespace LearningPlatformAPI.Controllers
                             var newFinish = new UserTriggeredEvent
                             {
                                 UserID = request.UserId,
-                                EventID = 4,
+                                EventID = (int)EventsEnum.FinishSection,
                                 TimeStamp = DateTime.Now,
-                                Detail = $"CourseSectionID = {request.CourseSectionId}"
+                                Detail = $"{request.CourseSectionId}"
                             };
 
                             _context.UserTriggeredEvent.Add(newFinish);
