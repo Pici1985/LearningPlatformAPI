@@ -34,6 +34,12 @@ namespace LearningPlatformAPI.Controllers
                                        select new NrOfLoginTimes
                                        {
                                            UserID = newGroup.Key,
+                                           FirstName = (from f in _context.Person
+                                                        where f.UserId == newGroup.Key
+                                                        select f.FirstName).FirstOrDefault(),
+                                           LastName = (from f in _context.Person
+                                                       where f.UserId == newGroup.Key
+                                                       select f.LastName).FirstOrDefault(),
                                            LoginTimes = (from logincount in newGroup
                                                          where logincount.UserID > 0 && logincount.EventID == 1
                                                          select logincount).Count()
