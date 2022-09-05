@@ -61,7 +61,57 @@ namespace LearningPlatformAPI.Controllers
             if (boardid == (int)LeaderBoardTypesEnum.FastestCourseCompletionTime)
             {
 
-                return Ok("FastestCourseCompletionTime");
+                var leaders = (from l in _context.UserTriggeredEvent
+                               select new UserFinishedCourseIn
+                               {
+                                   UserID = l.UserID,
+                                   CourseID = (from c in _context.CourseSection
+                                               where c.SectionId == l.Detail
+                                               select c.CourseId).FirstOrDefault(),
+                                   // this is obviously not right :) 
+                                   FinishedIn = (from f in _context.UserTriggeredEvent
+                                                 join courseid in _context.CourseSection on f.Detail equals courseid.Id
+                                                 where f.Detail == courseid.Id && f.EventID == (int)EventsEnum.FinishCourse
+                                                 select f.TimeStamp).FirstOrDefault().Subtract((from f in _context.UserTriggeredEvent
+                                                                                                join courseid in _context.CourseSection on f.Detail equals courseid.Id
+                                                                                                where f.Detail == courseid.Id && f.EventID == (int)EventsEnum.StartCourse
+                                                                                                select f.TimeStamp).FirstOrDefault()).ToString()
+                               }
+                               ).ToList();
+
+                // dummy data
+                //var leaders = new List <UserFinishedCourseIn>() 
+                //{ };
+
+                //var time1 = new TimeOnly(0, 14, 18).ToLongTimeString();
+                //var time2 = new TimeOnly(0, 16, 18).ToLongTimeString();
+
+                //var user1 = new UserFinishedCourseIn()
+                //{
+                //    UserID = 1,
+                //    CourseID = 1,
+                //    FinishedIn = time1
+                //};
+                
+                //var user2 = new UserFinishedCourseIn()
+                //{
+                //    UserID = 2,
+                //    CourseID = 1,
+                //    FinishedIn = time2
+                //};
+                
+                //leaders.Add(user1);
+                //leaders.Add(user2);
+                // until here 
+
+
+                var result = new FastestFinishedCourses()
+                {
+                    Title = "FastestCourseCompletionTime",
+                    Leaders = leaders
+                };
+
+                return Ok(result);
             }
 
 
