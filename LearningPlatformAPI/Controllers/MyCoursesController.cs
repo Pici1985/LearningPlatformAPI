@@ -37,13 +37,13 @@ namespace LearningPlatformAPI.Controllers
                                            {
                                                SectionID = allsections.SectionID,
                                                Started = _context.UserTriggeredEvent.Where(x=> x.UserID == userid && x.EventID == 
-                                                        (int)EventsEnum.StartSection && x.Detail == coursesection.Id.ToString()).FirstOrDefault() != 
+                                                        (int)EventsEnum.StartSection && x.Detail == coursesection.Id).FirstOrDefault() != 
                                                         null ? _context.UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
-                                                        (int)EventsEnum.StartSection && x.Detail == coursesection.Id.ToString()).FirstOrDefault().TimeStamp : null,
+                                                        (int)EventsEnum.StartSection && x.Detail == coursesection.Id).FirstOrDefault().TimeStamp : null,
                                                Finished = _context.UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID == 
-                                                        (int)EventsEnum.FinishSection && x.Detail == coursesection.Id.ToString()).FirstOrDefault() != 
+                                                        (int)EventsEnum.FinishSection && x.Detail == coursesection.Id).FirstOrDefault() != 
                                                         null ? _context.UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
-                                                        (int)EventsEnum.FinishSection && x.Detail == coursesection.Id.ToString()).FirstOrDefault().TimeStamp : null,
+                                                        (int)EventsEnum.FinishSection && x.Detail == coursesection.Id).FirstOrDefault().TimeStamp : null,
                                            }).ToList()
                            }).ToList();
 

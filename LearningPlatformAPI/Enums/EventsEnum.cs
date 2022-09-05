@@ -7,6 +7,7 @@
         EnrollCourse,
         StartSection,
         FinishSection,
+        StartCourse,
         FinishCourse,
         HitStreakLimit    
     }        

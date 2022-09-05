@@ -80,7 +80,7 @@ namespace LearningPlatformAPI.Controllers
                     UserID = person.UserId,
                     EventID = 1,
                     TimeStamp = date,
-                    Detail = null
+                    Detail = 0
                  };
 
                 // get the user from the db with the passed in credentials

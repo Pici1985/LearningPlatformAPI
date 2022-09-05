@@ -25,6 +25,7 @@ namespace LearningPlatformAPI.Controllers
         public async Task<IActionResult> GetLeaderBoards(int boardid)
         {
 
+        // this if is for NrOfLoginTimes
             if (boardid == (int)LeaderBoardTypesEnum.NrOfLoginTimes) 
             {
                 
@@ -56,19 +57,50 @@ namespace LearningPlatformAPI.Controllers
                 return Ok(response);
             }
 
+        // this if is for FastestCourseCompletionTime
             if (boardid == (int)LeaderBoardTypesEnum.FastestCourseCompletionTime)
             {
+
                 return Ok("FastestCourseCompletionTime");
             }
-            
+
+
+        // this if is for LongestStreak
             if (boardid == (int)LeaderBoardTypesEnum.LongestConsecutiveStreak) 
             {
                 return Ok("LongestConsecutiveStreak");
             }
-            
+
+
+        // this if is for NrOfFinishedCourses
             if (boardid == (int)LeaderBoardTypesEnum.NrOfFinishedCourses) 
             {
-                return Ok("NrOfFinishedCourses");
+                var getLeadersByFinishedCoursesGroup = (from l in _context.UserTriggeredEvent
+                                                       where l.UserID > 0 && l.EventID == (int)EventsEnum.FinishCourse
+                                                       group l by l.UserID into newGroup
+                                                       select new NrOfFinishedCourses
+                                                       {
+                                                           UserID = newGroup.Key,
+                                                           FirstName = (from f in _context.Person
+                                                                        where f.UserId == newGroup.Key
+                                                                        select f.FirstName).FirstOrDefault(),
+                                                           LastName = (from f in _context.Person
+                                                                       where f.UserId == newGroup.Key
+                                                                       select f.LastName).FirstOrDefault(),
+                                                           CoursesFinished = (from courseFinshedcount in newGroup
+                                                                            where courseFinshedcount.UserID > 0 && courseFinshedcount.EventID == (int)EventsEnum.FinishCourse
+                                                                              select courseFinshedcount).Count()
+                                                       }).ToList();
+
+                var getLeadersByFinishedCoursesGroupOrdered = getLeadersByFinishedCoursesGroup.OrderByDescending(l => l.CoursesFinished);
+
+                var response = new UsersNrOfFinishedCourses()
+                {
+                    Title = "NrOfFinishedCourses",
+                    Leaders = getLeadersByFinishedCoursesGroupOrdered
+                };
+
+                return Ok(response);
             }
             return BadRequest("LeaderBoard does not exist");
         }
