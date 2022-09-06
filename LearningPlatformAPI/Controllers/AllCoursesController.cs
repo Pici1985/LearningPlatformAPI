@@ -83,6 +83,9 @@ namespace LearningPlatformAPI.Controllers
                 UserID = request.UserId,
             };
 
+            //create enroll event
+
+
             _context.MyCourses.Add(newCourse);
             await _context.SaveChangesAsync();          
 

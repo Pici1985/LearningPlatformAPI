@@ -4,6 +4,6 @@
     {
         public int UserID { get; set; } 
         public int CourseID { get; set; }
-        public string FinishedIn { get; set; }
+        public TimeSpan FinishedIn { get; set; }
     }
 }

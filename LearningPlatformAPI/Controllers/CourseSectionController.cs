@@ -79,7 +79,7 @@ namespace LearningPlatformAPI.Controllers
                                     UserID = request.UserId,
                                     EventID = (int)EventsEnum.StartCourse,
                                     TimeStamp = DateTime.Now,
-                                    Detail = request.CourseSectionId
+                                    Detail = currentCourseId
                                 };
 
                                 _context.UserTriggeredEvent.Add(newCourseStartEvent);
@@ -130,6 +130,10 @@ namespace LearningPlatformAPI.Controllers
 
                         if (hasEventBeenFinished == null) 
                         { 
+                            var currentCourseId = (from c in _context.CourseSection
+                                                   where c.Id == request.CourseSectionId
+                                                   select c.CourseId).FirstOrDefault();
+
                             // create finished event 
                             var newFinish = new UserTriggeredEvent
                             {
@@ -141,9 +145,6 @@ namespace LearningPlatformAPI.Controllers
 
                             // check if a course has been finished with this finishevent
 
-                            var currentCourseId = (from c in _context.CourseSection
-                                                   where c.Id == request.CourseSectionId
-                                                   select c.CourseId).FirstOrDefault();
 
                             var currentCourseSectionIds = (from c in _context.CourseSection
                                                            where c.CourseId == currentCourseId

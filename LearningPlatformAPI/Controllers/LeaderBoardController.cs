@@ -60,55 +60,45 @@ namespace LearningPlatformAPI.Controllers
         // this if is for FastestCourseCompletionTime
             if (boardid == (int)LeaderBoardTypesEnum.FastestCourseCompletionTime)
             {
+                var table = _context.UserTriggeredEvent.ToList();
 
-                var leaders = (from l in _context.UserTriggeredEvent
-                               select new UserFinishedCourseIn
-                               {
-                                   UserID = l.UserID,
-                                   CourseID = (from c in _context.CourseSection
-                                               where c.SectionId == l.Detail
-                                               select c.CourseId).FirstOrDefault(),
-                                   // this is obviously not right :) 
-                                   FinishedIn = (from f in _context.UserTriggeredEvent
-                                                 join courseid in _context.CourseSection on f.Detail equals courseid.Id
-                                                 where f.Detail == courseid.Id && f.EventID == (int)EventsEnum.FinishCourse
-                                                 select f.TimeStamp).FirstOrDefault().Subtract((from f in _context.UserTriggeredEvent
-                                                                                                join courseid in _context.CourseSection on f.Detail equals courseid.Id
-                                                                                                where f.Detail == courseid.Id && f.EventID == (int)EventsEnum.StartCourse
-                                                                                                select f.TimeStamp).FirstOrDefault()).ToString()
-                               }
-                               ).ToList();
+                var leaders = new List<UserFinishedCourseIn>() { };
 
-                // dummy data
-                //var leaders = new List <UserFinishedCourseIn>() 
-                //{ };
+                var finishedCourseIds = new List<int>() { };
 
-                //var time1 = new TimeOnly(0, 14, 18).ToLongTimeString();
-                //var time2 = new TimeOnly(0, 16, 18).ToLongTimeString();
+                foreach(var i in table) 
+                {
+                    if (i.EventID == (int)EventsEnum.FinishCourse)
+                    {
+                        finishedCourseIds.Add(i.Detail);
+                    }
+                }
+                           
+                foreach (var f in finishedCourseIds) 
+                {
+                    var userfinishedcoursein = new UserFinishedCourseIn() { };
 
-                //var user1 = new UserFinishedCourseIn()
-                //{
-                //    UserID = 1,
-                //    CourseID = 1,
-                //    FinishedIn = time1
-                //};
-                
-                //var user2 = new UserFinishedCourseIn()
-                //{
-                //    UserID = 2,
-                //    CourseID = 1,
-                //    FinishedIn = time2
-                //};
-                
-                //leaders.Add(user1);
-                //leaders.Add(user2);
-                // until here 
+                    var userid = (from x in table
+                                  where x.Detail == f
+                                  select x.UserID).FirstOrDefault();
+                    var courseid = f;
+                    var finishedin = ((from x in table
+                                       where x.Detail == f && x.EventID == (int)EventsEnum.FinishCourse
+                                       select x.TimeStamp).FirstOrDefault()).Subtract((from y in table
+                                                                                       where y.Detail == f && y.EventID == (int)EventsEnum.StartCourse
+                                                                                       select y.TimeStamp).FirstOrDefault());
+                                       
+                    userfinishedcoursein.UserID = userid;
+                    userfinishedcoursein.CourseID = courseid;
+                    userfinishedcoursein.FinishedIn = finishedin;   
 
-
+                    leaders.Add(userfinishedcoursein);
+                }                   
+           
                 var result = new FastestFinishedCourses()
                 {
                     Title = "FastestCourseCompletionTime",
-                    Leaders = leaders
+                    Leaders = leaders.OrderByDescending(x => x.FinishedIn).ToList()
                 };
 
                 return Ok(result);
