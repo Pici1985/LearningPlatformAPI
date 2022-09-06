@@ -1,4 +1,5 @@
-﻿using LearningPlatformAPI.Models;
+﻿using LearningPlatformAPI.Enums;
+using LearningPlatformAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 
@@ -39,9 +40,6 @@ namespace LearningPlatformAPI.Controllers
             // need to check if userid exists
             if (_context.Person.Any(i => i.UserId == userid))
             {
-                //this is a working solution - useless
-
-
                 var allcourses = _context.AllCourses.ToList();
 
                 var allCoursesIds = (from a in allcourses
@@ -84,7 +82,15 @@ namespace LearningPlatformAPI.Controllers
             };
 
             //create enroll event
+            var newEnroll = new UserTriggeredEvent
+            {
+                UserID = request.UserId,
+                EventID = (int)EventsEnum.EnrollCourse,
+                TimeStamp = DateTime.Now,
+                Detail = request.CourseId
+            };
 
+            _context.UserTriggeredEvent.Add(newEnroll);
 
             _context.MyCourses.Add(newCourse);
             await _context.SaveChangesAsync();          
