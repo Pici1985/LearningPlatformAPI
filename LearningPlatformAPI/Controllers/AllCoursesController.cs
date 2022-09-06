@@ -55,13 +55,10 @@ namespace LearningPlatformAPI.Controllers
                                join av in availableCourses on m.CourseId equals av
                                select m).ToList();
 
-                // return an object result
                 return Ok(courses);
             }
             return BadRequest($"User NR {userid} doesn't exist!!");
         }
-
-        //refactored solution
 
         [HttpPost]
         [Route("enroll")]
@@ -98,7 +95,7 @@ namespace LearningPlatformAPI.Controllers
             return Ok($"user: {request.UserId} enrolled on course: {request.CourseId}");
         }
 
-        // Validator function t osee if user has already enrolled to given course
+        // Validator function to see if user has already enrolled to given course
         private ObjectResult Validate(CreateEnrollRequest request)
         {
             //check if user exists
@@ -129,20 +126,5 @@ namespace LearningPlatformAPI.Controllers
             }
             return null;
         }
-
-
-        // this is from boilerplate
-
-        //// PUT api/<AllCoursesController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<AllCoursesController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

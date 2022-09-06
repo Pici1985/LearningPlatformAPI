@@ -3,8 +3,6 @@ using LearningPlatformAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace LearningPlatformAPI.Controllers
 {
     [Route("api/auth")]
@@ -17,22 +15,6 @@ namespace LearningPlatformAPI.Controllers
         {
             _context = context;
         }
-
-        // TEST endpoint to check if db connection works
-
-        //[HttpGet]
-        //[Route("events")]
-        //public async Task<ActionResult<UserTriggeredEvent>> GetEvents()
-        //{
-        //    var events = await _context.UserTriggeredEvent.ToListAsync();
-
-        //    if (events != null)
-        //    {
-        //        return Ok(events);
-        //    }
-        //    return BadRequest();
-        //}
-
 
         [HttpPost]
         [Route("signup")]
@@ -65,16 +47,6 @@ namespace LearningPlatformAPI.Controllers
 
                 DateTime date = DateTime.Now;
 
-                // this bit is redundant------------------------------------------
-
-                //PersonLoggedInOnDate passin = new PersonLoggedInOnDate()
-                //{
-                //    UserID = person.UserId,
-                //    DateTime = date
-                //};
-                
-                // this bit is redundant------------------------------------------
-
                 UserTriggeredEvent passIn = new UserTriggeredEvent()
                 {
                     UserID = person.UserId,
@@ -91,16 +63,7 @@ namespace LearningPlatformAPI.Controllers
                 _context.UserTriggeredEvent.Add(passIn);
 
                 await _context.SaveChangesAsync();       
-
-                //this could save the timestamp as well
-
-                // this another way to build a string
-                //var sb = new StringBuilder();
-                //    sb.Append("hello");
-                //    sb.Append(person.FirstName);
-                //    sb.Append("Login successful! Token created:");
-                //    sb.Append(token);
-
+                                
                 var loginSuccess = new LoginSuccess() 
                 { 
                     FirstName = person.FirstName,
@@ -235,16 +198,12 @@ namespace LearningPlatformAPI.Controllers
             if (loginModel.Email != "email")
             {
                 return BadRequest("Login failed!");
-                //return BadRequest("Login failed!");
-
             }
 
             if (loginModel.Password != "password")
             {
                 return BadRequest("Login failed!");
-                //return BadRequest("Login failed!");
             }
-
             return BadRequest();
         }
 
