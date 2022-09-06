@@ -107,7 +107,10 @@ namespace LearningPlatformAPI.Controllers
         // this if is for LongestStreak
             if (boardid == (int)LeaderBoardTypesEnum.LongestConsecutiveStreak) 
             {
-                
+                // calculate longest streak for each user
+                    //     
+
+                // stick the into leaders list 
                 
                 var leaders = new List<LongestConsecutiveStreak>() { };          
                 
