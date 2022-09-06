@@ -9,8 +9,7 @@ namespace LearningPlatformAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class LeaderBoardController : ControllerBase
-    {
-
+    { 
         // dependency injection
         private readonly DataContext _context;
 
@@ -108,7 +107,17 @@ namespace LearningPlatformAPI.Controllers
         // this if is for LongestStreak
             if (boardid == (int)LeaderBoardTypesEnum.LongestConsecutiveStreak) 
             {
-                return Ok("LongestConsecutiveStreak");
+                
+                
+                var leaders = new List<LongestConsecutiveStreak>() { };          
+                
+                var result = new LeadersOfLongestConsecutiveStreak()
+                {
+                    Title = "LongestConsecutiveStreak",
+                    Leaders = leaders.OrderByDescending(x => x.Streak)
+                };
+
+                return Ok(result);
             }
 
 
