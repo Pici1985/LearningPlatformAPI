@@ -145,55 +145,6 @@ namespace LearningPlatformAPI.Controllers
                 return Ok($"Successful login: {loginSuccess.FirstName}! Current streak: {currentStreak}");
             }
                 // Calculate Current streak ------------------- useful until here ----------------------------------------------------
-
-
-
-                //----------------------------------- this is to calcualte the LongestStreak ------------------------------------//
-                //if (currentStreak > maxStreak)
-                //{
-                //    maxStreak = currentStreak;
-                //}           
-
-                // this formula IS not right
-                //static int Streak(List<int> binaryList)
-                //{
-                //    int max = 0;
-
-                //    for (int i = 0; i < binaryList.Count; i++)
-                //    {
-                //        int count = 0;
-                //        for (int j = i; j < binaryList.Count; j++)
-                //        {
-                //            if (binaryList[i] == binaryList[j]) count++;
-                //            if (count > max) max = count;
-                //            if (binaryList[i] != binaryList[j]) break;
-                //        }
-                //    }
-                //    return max;
-                //}
-
-                // this formula should be made right :)
-                //static int Streak(List<int> binaryList)
-                //{
-                //    int currentStreak = 0;
-                //    int maxStreak = 0;
-
-                //    foreach (var m in binaryList) 
-                //    {
-                //        if (m.Equals(1))
-                //        {
-                //            currentStreak++;
-                //        }
-                //        else
-                //        {
-                //            currentStreak = 0;
-                //        }
-                //    };
-
-                //    return maxStreak;
-                //}
-
-                //----------------------------------- this is to calcualte the LongestStreak ------------------------------------//
                         
             if (loginModel.Email != "email")
             {

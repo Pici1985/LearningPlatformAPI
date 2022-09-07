@@ -24,7 +24,7 @@ namespace LearningPlatformAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<AllCourses>> GetAllCourses()
         {
-            var courses = await _context.AllCourses.ToListAsync();
+            var courses = _context.GetAllCourses();
 
             if (courses != null)
             {
@@ -38,93 +38,45 @@ namespace LearningPlatformAPI.Controllers
         public async Task<IActionResult> GetAvailableCourses(int userid)
         {
             // need to check if userid exists
-            if (_context.Person.Any(i => i.UserId == userid))
+            var personExists = _context.DoesPersonExist(userid);
+
+            if (personExists)
             {
-                var allcourses = _context.AllCourses.ToList();
+                var availableCourses = _context.GetAvailableCourses(userid);
 
-                var allCoursesIds = (from a in allcourses
-                                     select a.CourseId).ToList();
-
-                var enrolledCoursesIds = (from m in _context.MyCourses
-                                          where m.UserID == userid
-                                          select m.CourseID).ToList();
-
-                var availableCourses = allCoursesIds.Except(enrolledCoursesIds).ToList();
-
-                var courses = (from m in allcourses
-                               join av in availableCourses on m.CourseId equals av
-                               select m).ToList();
-
-                return Ok(courses);
+                return Ok(availableCourses);
             }
-            return BadRequest($"User NR {userid} doesn't exist!!");
+            return BadRequest($"UserID: {userid} doesn't exist!!");
         }
 
         [HttpPost]
         [Route("enroll")]
         public async Task<IActionResult> Post([FromBody] CreateEnrollRequest request)
         {
-            var validateResult = Validate(request);
+            var validateResult = _context.Validate(request);
 
             if (validateResult != null)
             {
-                return validateResult;
+                return BadRequest(validateResult);
+            }
+
+            if (validateResult == $"already enrolled") 
+            {
+                return BadRequest(validateResult);
+            }
+
+            if (validateResult == $"course: {request.CourseId} not found")
+            {
+                return BadRequest(validateResult);
             }
             
-            //create new enrollment with given user on given course
-            MyCourses newCourse = new MyCourses
+            if (validateResult == $"person: {request.UserId} not found")
             {
-                CourseID = request.CourseId,
-                UserID = request.UserId,
-            };
+                return BadRequest(validateResult);
+            }
 
-            //create enroll event
-            var newEnroll = new UserTriggeredEvent
-            {
-                UserID = request.UserId,
-                EventID = (int)EventsEnum.EnrollCourse,
-                TimeStamp = DateTime.Now,
-                Detail = request.CourseId
-            };
-
-            _context.UserTriggeredEvent.Add(newEnroll);
-
-            _context.MyCourses.Add(newCourse);
-            await _context.SaveChangesAsync();          
-
+            _context.EnrollOnCourse(request);
             return Ok($"user: {request.UserId} enrolled on course: {request.CourseId}");
-        }
-
-        // Validator function to see if user has already enrolled to given course
-        private ObjectResult Validate(CreateEnrollRequest request)
-        {
-            //check if user exists
-            if (_context.Person.Any(i => i.UserId == request.UserId))
-            {
-                //check if course exists
-                if (_context.AllCourses.Any(c => c.CourseId == request.CourseId))
-                {
-                    var userEnrolledOnCourse = (from c in _context.MyCourses
-                                                where c.CourseID == request.CourseId && c.UserID == request.UserId
-                                                select c).Count();
-
-                    //check if enrollment already exists
-                    if (userEnrolledOnCourse > 0)
-                    {
-                        Console.WriteLine($"User: {request.UserId} already enrolled to Course: {request.CourseId}");
-                        return Conflict("already enrolled");
-                    }
-                }
-                else
-                {
-                    return BadRequest($"course: {request.CourseId} not found");
-                }
-            }
-            else
-            {
-                return BadRequest($"person: {request.UserId} not found");
-            }
-            return null;
         }
     }
 }
