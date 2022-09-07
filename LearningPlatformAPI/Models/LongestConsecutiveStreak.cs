@@ -3,6 +3,6 @@
     public class LongestConsecutiveStreak
     {
         public int UserID { get; set; }
-        public int Streak { get; set; }
+        public int longestStreak { get; set; }
     }
 }
