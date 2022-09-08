@@ -84,8 +84,9 @@ namespace LearningPlatformAPI.Data
             SaveChangesAsync();
         }
 
-        public string Validate(CreateEnrollRequest request)
+        public EnrollValidateResponse Validate(CreateEnrollRequest request)
         {
+            var result = new EnrollValidateResponse() { };
             //check if user exists
             if (Person.Any(i => i.UserId == request.UserId))
             {
@@ -99,18 +100,26 @@ namespace LearningPlatformAPI.Data
                     //check if enrollment already exists
                     if (userEnrolledOnCourse > 0)
                     {
-                        Console.WriteLine($"User: {request.UserId} already enrolled to Course: {request.CourseId}");
-                        return "already enrolled";
+                        //Console.WriteLine($"User: {request.UserId} already enrolled to Course: {request.CourseId}");
+                        result.IsValidated = false;
+                        result.Message = "already enrolled";
+                        return result;
                     }
                 }
                 else
                 {
-                    return $"course: {request.CourseId} not found";
+                    result.IsValidated = false;
+                    result.Message = $"course: {request.CourseId} not found";
+                    return result;
+                    //return $"course: {request.CourseId} not found";
                 }
             }
             else
             {
-                return $"person: {request.UserId} not found";
+                result.IsValidated = false;
+                result.Message = $"user: {request.UserId} not found";
+                return result;
+                //return $"person: {request.UserId} not found";
             }
             return null;
         }

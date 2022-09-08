@@ -51,32 +51,27 @@ namespace LearningPlatformAPI.Controllers
 
         [HttpPost]
         [Route("enroll")]
-        public async Task<IActionResult> Post([FromBody] CreateEnrollRequest request)
+        public async Task<ActionResult<EnrollValidateResponse>> Post([FromBody] CreateEnrollRequest request)
         {
             var validateResult = _context.Validate(request);
 
             if (validateResult != null)
             {
+                if (validateResult.IsValidated == false)
+                {
+                    return BadRequest(validateResult);
+                }
                 return BadRequest(validateResult);
             }
 
-            if (validateResult == $"already enrolled") 
+            validateResult = new EnrollValidateResponse()
             {
-                return BadRequest(validateResult);
-            }
-
-            if (validateResult == $"course: {request.CourseId} not found")
-            {
-                return BadRequest(validateResult);
-            }
+                IsValidated = true,
+                Message = $" User: {request.UserId} enrolled on Course: {request.CourseId}"
+            };
             
-            if (validateResult == $"person: {request.UserId} not found")
-            {
-                return BadRequest(validateResult);
-            }
-
             _context.EnrollOnCourse(request);
-            return Ok($"user: {request.UserId} enrolled on course: {request.CourseId}");
+            return Ok(validateResult);
         }
     }
 }
