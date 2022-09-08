@@ -21,24 +21,16 @@ namespace LearningPlatformAPI.Controllers
         [Route("signup")]
         public async Task<IActionResult> PostPerson([FromBody] Person person)
         {
-            if (person.FirstName != "") 
+            if(string.IsNullOrWhiteSpace(person.FirstName) && 
+               string.IsNullOrWhiteSpace(person.LastName) && 
+               string.IsNullOrWhiteSpace(person.Email) &&  
+               string.IsNullOrWhiteSpace(person.Password)
+               ) 
             {
-                if (person.LastName != "") 
-                {
-                    if (person.Email != "") 
-                    {
-                        if (person.Password != "") 
-                        { 
-                            var newPerson = _context.registerPerson(person);
-                            return Ok($"Person registered: {newPerson.FirstName}, {newPerson.LastName}");
-                        }
-                        return BadRequest("Password can't be empty");
-                    }
-                    return BadRequest("Email can't be empty");
-                }
-                return BadRequest("LastName can't be empty");   
-            }
-            return BadRequest("FirstName can't be empty");   
+                var newPerson = _context.registerPerson(person);
+                return Ok($"Person registered: {newPerson.FirstName}, {newPerson.LastName}");
+            }           
+            return BadRequest(new { Message = "Field cannot be empty!!"});   
         }
         
         [HttpPost]
