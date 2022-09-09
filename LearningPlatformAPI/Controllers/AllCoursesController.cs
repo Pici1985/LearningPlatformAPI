@@ -44,9 +44,13 @@ namespace LearningPlatformAPI.Controllers
             {
                 var availableCourses = _context.GetAvailableCourses(userid);
 
+                if (availableCourses.Count == 0) 
+                { 
+                    return BadRequest(new { Message = $"No more available courses for User: {userid}"});
+                }
                 return Ok(availableCourses);
             }
-            return BadRequest($"UserID: {userid} doesn't exist!!");
+            return BadRequest(new { Message = $"UserID: {userid} doesn't exist!!" });
         }
 
         [HttpPost]
