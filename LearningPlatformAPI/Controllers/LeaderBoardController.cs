@@ -20,6 +20,7 @@ namespace LearningPlatformAPI.Controllers
             _context = context;
         }
         
+        //Endpoints
         [HttpGet]
         [Route("{boardid}")]
         public async Task<IActionResult> GetLeaderBoards(int boardid)

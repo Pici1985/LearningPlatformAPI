@@ -262,6 +262,192 @@ namespace LearningPlatformAPI.Data
         }
 
 
+        // Methods for CourseSectionController
+        public StartSectionByUser startSectionByUser(CreateSectionRequest request) 
+        {
+            var result = new StartSectionByUser() { };
+            // check if userid exists
+            if (Person.Any(i => i.UserId == request.UserId))
+            {
+                // check if CourseSectionId exists
+                if (CourseSection.Any(c => c.Id == request.CourseSectionId))
+                {
+                    var currentCourseId = (from c in CourseSection
+                                           where c.Id == request.CourseSectionId
+                                           select c.CourseId
+                                          ).FirstOrDefault();
+
+                    var userEnrolledOnCourse = (from u in MyCourses
+                                                where u.CourseID == currentCourseId
+                                                select u).FirstOrDefault();
+
+                    // check if user enrolled on course
+                    if (userEnrolledOnCourse != null)
+                    {
+                        var someEvent = (from e in UserTriggeredEvent
+                                         where e.UserID == request.UserId && e.EventID == (int)EventsEnum.StartSection && e.Detail == request.CourseSectionId
+                                         select e).FirstOrDefault();
+
+                        // check if event has happened already
+                        if (someEvent == null)
+                        {
+                            //create event
+                            var newStart = new UserTriggeredEvent
+                            {
+                                UserID = request.UserId,
+                                EventID = (int)EventsEnum.StartSection,
+                                TimeStamp = DateTime.Now,
+                                Detail = request.CourseSectionId
+                            };
+
+                            var currentCourseSectionIds = (from c in CourseSection
+                                                           where c.CourseId == currentCourseId
+                                                           select c.Id).ToList();
+
+                            // check if section start event is a course start event as well
+                            var isCourseStartEvent = (from i in UserTriggeredEvent
+                                                      where i.UserID == request.UserId &&
+                                                            i.EventID == (int)EventsEnum.StartSection &&
+                                                            currentCourseSectionIds.Contains(i.Detail)
+                                                      select i).FirstOrDefault();
+
+                            result.Result = "Event created";
+
+                            if (isCourseStartEvent == null)
+                            {
+                                //Console.ForegroundColor = ConsoleColor.Red;
+                                //Console.WriteLine("This is a course start event! ");
+
+                                var newCourseStartEvent = new UserTriggeredEvent
+                                {
+                                    UserID = request.UserId,
+                                    EventID = (int)EventsEnum.StartCourse,
+                                    TimeStamp = DateTime.Now,
+                                    Detail = currentCourseId
+                                };
+
+                                UserTriggeredEvent.Add(newCourseStartEvent);
+
+                                result.Result = "Event created and Course Started!!";
+                            }
+
+                            UserTriggeredEvent.Add(newStart);
+                            SaveChangesAsync();
+
+                            return result;
+                        }
+                        result.Result = "Section already started!!";
+                        return result;
+                    }
+                    result.Result = "User isn't enrolled on course!!";
+                    return result;
+                }
+                result.Result = "CourseSectionId doesn't exist!!";
+                return result;
+            }
+            result.Result = "User doesn't exist!";
+            return result;
+        }
+
+        public FinishSectionByUser finishSectionByUser(CreateSectionRequest request) 
+        {
+            var result = new FinishSectionByUser() { };
+
+            // check if user exists
+            if (Person.Any(i => i.UserId == request.UserId))
+            {
+                // check if coursesectionid exists
+                if (CourseSection.Any(c => c.Id == request.CourseSectionId))
+                {
+
+                    var doesEventExist = (from d in UserTriggeredEvent
+                                          where d.UserID == request.UserId &&
+                                                d.EventID == (int)EventsEnum.StartSection &&
+                                                d.Detail == request.CourseSectionId
+                                          select d).FirstOrDefault();
+
+                    // check if event started
+                    if (doesEventExist != null)
+                    {
+                        var hasEventBeenFinished = (from d in UserTriggeredEvent
+                                                    where d.UserID == request.UserId &&
+                                                          d.EventID == (int)EventsEnum.FinishSection &&
+                                                          d.Detail == request.CourseSectionId
+                                                    select d).FirstOrDefault();
+
+                        if (hasEventBeenFinished == null)
+                        {
+                            var currentCourseId = (from c in CourseSection
+                                                   where c.Id == request.CourseSectionId
+                                                   select c.CourseId).FirstOrDefault();
+
+                            // create finished event 
+                            var newFinish = new UserTriggeredEvent
+                            {
+                                UserID = request.UserId,
+                                EventID = (int)EventsEnum.FinishSection,
+                                TimeStamp = DateTime.Now,
+                                Detail = request.CourseSectionId
+                            };
+
+                            // check if a course has been finished with this finishevent
+
+
+                            var currentCourseSectionIds = (from c in CourseSection
+                                                           where c.CourseId == currentCourseId
+                                                           select c.Id).ToList();
+
+                            var totalNrOfSectionsInCurrentCourse = (from t in CourseSection
+                                                                    where t.CourseId == currentCourseId
+                                                                    select t).Count();
+
+                            var finishedNrOfSectionsInCurrentCourse = (from f in UserTriggeredEvent
+                                                                       where f.UserID == request.UserId &&
+                                                                             f.EventID == (int)EventsEnum.FinishSection &&
+                                                                             currentCourseSectionIds.Contains(f.Detail)
+                                                                       select f
+                                                                       ).Count();
+
+                            bool hasCurrentCourseBeenFinished = totalNrOfSectionsInCurrentCourse == (finishedNrOfSectionsInCurrentCourse + 1);
+
+                            result.Result = "Section Finished";
+
+                            // until here
+
+                            if (hasCurrentCourseBeenFinished)
+                            {
+                                var newCourseFinish = new UserTriggeredEvent
+                                {
+                                    UserID = request.UserId,
+                                    EventID = (int)EventsEnum.FinishCourse,
+                                    TimeStamp = DateTime.Now,
+                                    Detail = currentCourseId
+                                };
+
+                                UserTriggeredEvent.Add(newCourseFinish);
+
+                                result.Result = "Section and Course Finished";
+                            }
+
+                            UserTriggeredEvent.Add(newFinish);
+                            SaveChangesAsync();
+
+                            return result;
+                        }
+                        result.Result = "Section already finished!";
+                        return result;
+                    }
+                    result.Result = "Section not started yet!";
+                    return result;
+                }
+                result.Result = "CourseSectionId doesn't exist!";
+                return result;
+            }
+            result.Result = "User doesn't exist!";
+            return result;
+        }
+
+
         // Methods for LeaderBoardController
         public UsersNrOfLogins GetUsersNrOfLogins() 
         {
@@ -470,6 +656,103 @@ namespace LearningPlatformAPI.Data
             };
 
             return result;
+        }
+
+
+        // Methods for MyCoursesController
+        public List<MyEnrolledCourses> GetMyCourses(int userid) 
+        {
+            var user = (from u in Person
+                       where u.UserId == userid
+                       select u).FirstOrDefault();
+
+            var courses = new List<MyEnrolledCourses>();
+
+            if (user == null) 
+            {
+                return courses;   
+            }
+            courses = (from mycourses in MyCourses
+                           join allcourses in AllCourses on mycourses.CourseID equals allcourses.CourseId
+                           where mycourses.UserID == userid
+                           select new MyEnrolledCourses
+                           {
+                               CourseTitle = allcourses.CourseTitle,
+                               Sections = (from coursesection in CourseSection
+                                           join allsections in AllSections on coursesection.SectionId equals allsections.SectionID
+                                           where coursesection.CourseId == allcourses.CourseId
+                                           select new StartedSection
+                                           {
+                                               SectionID = allsections.SectionID,
+                                               Started = UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
+                                                        (int)EventsEnum.StartSection && x.Detail == coursesection.Id).FirstOrDefault() !=
+                                                        null ? UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
+                                                        (int)EventsEnum.StartSection && x.Detail == coursesection.Id).FirstOrDefault().TimeStamp : null,
+                                               Finished = UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
+                                                        (int)EventsEnum.FinishSection && x.Detail == coursesection.Id).FirstOrDefault() !=
+                                                        null ? UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
+                                                        (int)EventsEnum.FinishSection && x.Detail == coursesection.Id).FirstOrDefault().TimeStamp : null,
+                                           }).ToList()
+                           }).ToList();
+
+            foreach (MyEnrolledCourses mec in courses)
+            {
+                var courseStarted = mec.Sections.Where(x => x.Started != null).Min(x => x.Started);
+                mec.CourseStarted = courseStarted != null ? courseStarted : null;
+                double totalsections = mec.Sections.Count();
+
+                var courseFinished = mec.Sections.Where(x => x.Finished != null).Max(x => x.Finished);
+                double finishedsections = mec.Sections.Where(x => x.Finished != null).Count();
+
+                // figure out this bit 
+                var progress = (int)((finishedsections / totalsections) * 100);
+
+                mec.CourseFinished = progress == 100 ? courseFinished : null;
+                mec.CourseProgress = progress;
+            }
+
+            return courses;
+        }
+
+
+        //Methods for PersonController
+        public List<Person> GetAllPersons() 
+        {
+            var person = Person.ToList();
+
+            return person;
+        }
+
+        public Person? GetPerson(int id) 
+        {
+            var person = Person.Find(id);
+
+            return person;
+        }
+
+        public Person PostPerson(Person person) 
+        {
+            Person.Add(person);
+            SaveChanges();
+
+            return person;
+        }
+
+        public Person? DeletePerson(int id) 
+        {
+            var person = Person.Find(id);
+
+            if(person != null) 
+            { 
+                Person.Remove(person);
+                SaveChanges();
+            }
+            return person;
+        }
+
+        public bool PersonExists(int id)
+        {
+            return (Person?.Any(e => e.UserId == id)).GetValueOrDefault();
         }
     }
 }

@@ -22,46 +22,43 @@ namespace LearningPlatformAPI.Controllers
             _context = context;
         }
 
-        // GET: api/Person
-        [ServiceFilter(typeof(SampleActionFilter))]
+        // Endpoints
+
+        // actionfilter disabled 
+        //[ServiceFilter(typeof(SampleActionFilter))]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Person>>> GetPerson()
+        public async Task<ActionResult<IEnumerable<Person>>> GetAllPersons()
         {
-          if (_context.Person == null)
-          {
-              return NotFound();
-          }
-            return await _context.Person.ToListAsync();
-        }
+            var person = _context.GetAllPersons();
 
-        // GET: api/Person/5
-        //[this where my new actionfilter would go]
-        [ServiceFilter(typeof(SampleActionFilter))]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<Person>> GetPerson(int id)
-        {
-          if (_context.Person == null)
-          {
-              return NotFound();
-          }
-            var person = await _context.Person.FindAsync(id);
-
-            if (person == null)
+            if (person.Count == 0)
             {
-                return NotFound();
+                return NotFound(new { Message = "Person not found! "});
             }
-
             return person;
         }
 
-        // PUT: api/Person/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // actionfilter disabled
+        //[ServiceFilter(typeof(SampleActionFilter))]
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Person>> GetPerson(int id)
+        {
+            var person = _context.GetPerson(id);
+
+            if (person == null)
+            {
+                return NotFound(new { Message = $"Person with Id nr {id} not found!! "});
+            }          
+            return person;
+        }
+
+        // how to do this best??? 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPerson(int id, Person person)
         {
             if (id != person.UserId)
             {
-                return BadRequest();
+                return BadRequest(new { Message = $"Entered ID {id} does not match UserID!!" });
             }
 
             _context.Entry(person).State = EntityState.Modified;
@@ -72,57 +69,43 @@ namespace LearningPlatformAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PersonExists(id))
+                if (!_context.PersonExists(id))
                 {
-                    return NotFound();
+                    return NotFound(new { Message = "Person not found!!"});
                 }
                 else
                 {
                     throw;
                 }
             }
-
-            return NoContent();
+            return Ok(new { Message = "Person updated!!" });
         }
-
-        // POST: api/Person
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+                
         [HttpPost]
         public async Task<ActionResult<Person>> PostPerson(Person person)
         {
-          if (_context.Person == null)
-          {
-              return Problem("Entity set 'DataContext.Person'  is null.");
-          }
-            _context.Person.Add(person);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPerson", new { id = person.UserId }, person);
+            var personToPost = _context.PostPerson(person);
+
+            if (personToPost == null)
+            {
+                return Problem("Entity set 'DataContext.Person'  is null.");
+            }
+             return CreatedAtAction("GetPerson", new { id = person.UserId }, person);
         }
-
-        // DELETE: api/Person/5
+                
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePerson(int id)
         {
-            if (_context.Person == null)
-            {
-                return NotFound();
-            }
-            var person = await _context.Person.FindAsync(id);
+            var person = _context.DeletePerson(id);
+                                    
             if (person == null)
             {
-                return NotFound();
-            }
-
-            _context.Person.Remove(person);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                return NotFound(new { Message = "Person not found! "});
+            }      
+            return Ok(new { Message = $"Person {id} removed from DB! "});
         }
 
-        private bool PersonExists(int id)
-        {
-            return (_context.Person?.Any(e => e.UserId == id)).GetValueOrDefault();
-        }
+        
     }
 }

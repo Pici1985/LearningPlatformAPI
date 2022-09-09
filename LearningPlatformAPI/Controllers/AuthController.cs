@@ -17,6 +17,7 @@ namespace LearningPlatformAPI.Controllers
             _context = context;
         }
 
+        // Endpoints
         [HttpPost]
         [Route("signup")]
         public async Task<IActionResult> PostPerson([FromBody] Person person)

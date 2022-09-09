@@ -20,7 +20,7 @@ namespace LearningPlatformAPI.Controllers
             _context = context;
         }
 
-        // GET: api/<AllCoursesController>
+        // endpoints
         [HttpGet]
         public async Task<ActionResult<AllCourses>> GetAllCourses()
         {
