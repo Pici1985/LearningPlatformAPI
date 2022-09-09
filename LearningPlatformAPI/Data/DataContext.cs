@@ -519,7 +519,7 @@ namespace LearningPlatformAPI.Data
             var result = new FastestFinishedCourses()
             {
                 Title = "FastestCourseCompletionTime",
-                Leaders = leaders.OrderByDescending(x => x.FinishedIn).ToList()
+                Leaders = leaders.OrderBy(x => x.FinishedIn).ToList()
             };
 
             return result;
