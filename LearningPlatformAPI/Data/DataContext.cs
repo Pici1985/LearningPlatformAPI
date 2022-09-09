@@ -485,34 +485,31 @@ namespace LearningPlatformAPI.Data
 
             var leaders = new List<UserFinishedCourseIn>() { };
 
-            var finishedCourseIds = new List<int>() { };
+            var finishedCourseIds = new List<UserTriggeredEvent>() { };
 
             foreach (var i in table)
             {
                 if (i.EventID == (int)EventsEnum.FinishCourse)
                 {
-                    finishedCourseIds.Add(i.Detail);
+                    finishedCourseIds.Add(i);
                 }
             }
 
             foreach (var f in finishedCourseIds)
             {
                 var userfinishedcoursein = new UserFinishedCourseIn() { };
-
-                var userid = (from x in table
-                              where x.Detail == f
-                              select x.UserID).FirstOrDefault();
-                var courseid = f;
+                                
                 var finishedin = ((from x in table
-                                   where x.Detail == f && x.EventID == (int)EventsEnum.FinishCourse
+                                   where x.Detail == f.Detail && x.EventID == (int)EventsEnum.FinishCourse && x.UserID == f.UserID
                                    select x.TimeStamp).FirstOrDefault()).Subtract((from y in table
-                                                                                   where y.Detail == f && y.EventID == (int)EventsEnum.StartCourse
+                                                                                   where y.Detail == f.Detail && y.EventID == (int)EventsEnum.StartCourse && y.UserID == f.UserID
                                                                                    select y.TimeStamp).FirstOrDefault());
 
-                userfinishedcoursein.UserID = userid;
-                userfinishedcoursein.CourseID = courseid;
+                userfinishedcoursein.UserID = f.UserID;
+                userfinishedcoursein.CourseID = f.Detail;
                 userfinishedcoursein.FinishedIn = finishedin;
 
+                // distinct somehow?
                 leaders.Add(userfinishedcoursein);
             }
 
