@@ -192,7 +192,7 @@ namespace LearningPlatformAPI.Data
         {
             //get distinct dates from db 
             var dates = (from d in UserTriggeredEvent
-                         where d.UserID == person.UserId
+                         where d.UserID == person.UserId && d.EventID == 1
                          orderby d.TimeStamp ascending
                          select d.TimeStamp.Date).Distinct().ToList();
 
