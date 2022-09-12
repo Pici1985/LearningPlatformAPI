@@ -11,23 +11,21 @@ namespace LearningPlatformAPI.ActionFilters
 
         public SampleActionFilter(DataContext context)
         {
-            this.dbContext = context;
+            dbContext = context;
         }
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             if (context.HttpContext.Request.Headers.TryGetValue( "TOKEN", out var token))
             {
                 var doesTokenExist = (from dt in dbContext.Person
-                                     where dt.Token.ToString() == (string)token
+                                     where dt.Token.ToString() == token
                                      select dt).FirstOrDefault();
-
 
                 if (context.ActionArguments.TryGetValue("Id", out var value))
                 {
                     var currentToken = (from ct in dbContext.Person
                                         where ct.UserId == (int)value
                                         select ct.Token).FirstOrDefault();
-
 
                     if (doesTokenExist?.Token == currentToken)
                     {
@@ -45,11 +43,5 @@ namespace LearningPlatformAPI.ActionFilters
             context.Result = new UnauthorizedResult();
             return;
         }
-
-        //public void OnActionExecuted(ActionExecutedContext context)
-        //{
-        //    Console.ForegroundColor = ConsoleColor.Green;
-        //    Console.WriteLine("This has run after the action");
-        //}
     }
 }
