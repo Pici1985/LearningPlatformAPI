@@ -543,7 +543,7 @@ namespace LearningPlatformAPI.Data
             {
                 // getting all the dates a user actually logged in
                 var allActualDatesLoggedIn = (from d in dataTable
-                                              where d.UserID == user
+                                              where d.UserID == user && d.EventID == 1
                                               orderby d.TimeStamp ascending
                                               select d.TimeStamp.Date).Distinct().ToList();
 
