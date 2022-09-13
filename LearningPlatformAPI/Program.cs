@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<SampleActionFilter>();
-builder.Services.AddScoped<IdActionFilter>();
+//builder.Services.AddScoped<IdActionFilter>();
 
 // Connect to database
 builder.Services.AddDbContext<DataContext>(options =>

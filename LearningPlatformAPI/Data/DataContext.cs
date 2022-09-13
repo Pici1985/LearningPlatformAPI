@@ -680,6 +680,9 @@ namespace LearningPlatformAPI.Data
                                            where coursesection.CourseId == allcourses.CourseId
                                            select new StartedSection
                                            {
+                                               CourseSectionID = (from c in CourseSection
+                                                                  where c.SectionId == coursesection.SectionId && c.CourseId == coursesection.CourseId
+                                                                  select c.Id).FirstOrDefault(),
                                                SectionID = allsections.SectionID,
                                                Started = UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
                                                         (int)EventsEnum.StartSection && x.Detail == coursesection.Id).FirstOrDefault() !=
