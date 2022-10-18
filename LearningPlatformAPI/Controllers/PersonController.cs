@@ -79,7 +79,7 @@ namespace LearningPlatformAPI.Controllers
 
                 
         [HttpDelete("delete")]
-        public async Task <IActionResult> Delete(int id)
+        public ActionResult Delete(int id)
         {
             try
             {
