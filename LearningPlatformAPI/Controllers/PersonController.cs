@@ -8,102 +8,89 @@ using Microsoft.EntityFrameworkCore;
 using LearningPlatformAPI.Data;
 using LearningPlatformAPI.Models;
 using LearningPlatformAPI.ActionFilters;
+using LearningPlatformAPI.Data.Interfaces;
+using System.Net.WebSockets;
+using System.Diagnostics;
 
 namespace LearningPlatformAPI.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
     public class PersonController : ControllerBase
     {
-        private readonly DataContext _context;
+        private readonly IPersonRepository _personRepo;
 
-        public PersonController(DataContext context)
+        public PersonController(IPersonRepository personRepository)
         {
-            _context = context;
+            _personRepo = personRepository;
         }
 
-        // Endpoints
-
-        // actionfilter disabled 
-        //[ServiceFilter(typeof(SampleActionFilter))]
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Person>>> GetAllPersons()
+        [HttpGet("get")]
+        public ActionResult Get()
         {
-            var person = _context.GetAllPersons();
-
-            if (person.Count == 0)
-            {
-                return NotFound(new { Message = "Person not found! "});
+            try 
+            { 
+                var person = _personRepo.GetAllPersons();
+                
+                return Ok(person);
             }
-            return person;
-        }
-
-        // actionfilter disabled
-        //[ServiceFilter(typeof(SampleActionFilter))]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<Person>> GetPerson(int id)
-        {
-            var person = _context.GetPerson(id);
-
-            if (person == null)
+            catch(Exception ex)
             {
-                return NotFound(new { Message = $"Person with Id nr {id} not found!! "});
-            }          
-            return person;
-        }
-
-        // how to do this best??? 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPerson(int id, Person person)
-        {
-            if (id != person.UserId)
-            {
-                return BadRequest(new { Message = $"Entered ID {id} does not match UserID!!" });
+                return BadRequest(ex);
             }
+        }
 
-            _context.Entry(person).State = EntityState.Modified;
-
+        [HttpPost("post")]
+        public ActionResult Post([FromBody]Person person)
+        {
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.PersonExists(id))
+                if (ModelState.IsValid)
                 {
-                    return NotFound(new { Message = "Person not found!!"});
+                    var result = _personRepo.PostPerson(person);
+                    return StatusCode(200, result);
                 }
                 else
                 {
-                    throw;
+                    return BadRequest();
                 }
             }
-            return Ok(new { Message = "Person updated!!" });
-        }
-                
-        [HttpPost]
-        public async Task<ActionResult<Person>> PostPerson(Person person)
-        {
-
-            var personToPost = _context.PostPerson(person);
-
-            if (personToPost == null)
+            catch (Exception ex) 
             {
-                return Problem("Entity set 'DataContext.Person'  is null.");
+                return BadRequest(ex);
             }
-             return CreatedAtAction("GetPerson", new { id = person.UserId }, person);
         }
-                
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePerson(int id)
+
+        // how to do this best??? 
+        [HttpPut("put")]
+        public ActionResult Put([FromBody] Person person)
         {
-            var person = _context.DeletePerson(id);
-                                    
-            if (person == null)
+            try
             {
-                return NotFound(new { Message = "Person not found! "});
-            }      
-            return Ok(new { Message = $"Person {id} removed from DB! "});
+                var result = _personRepo.PutPerson(person);
+
+                return StatusCode(200, result);
+            }
+            catch (Exception ex) 
+            {
+                return BadRequest(ex);
+            } 
+        }
+
+                
+        [HttpDelete("delete")]
+        public async Task <IActionResult> Delete(int id)
+        {
+            try
+            {
+                var result = _personRepo.DeletePerson(id);
+
+                return StatusCode(200, result);
+            }
+            catch (Exception ex) 
+            { 
+                return BadRequest(ex);
+            }
         }
 
         

@@ -1,6 +1,9 @@
 global using LearningPlatformAPI.Data;
 global using Microsoft.EntityFrameworkCore;
 using LearningPlatformAPI.ActionFilters;
+using LearningPlatformAPI.Data.Interfaces;
+using LearningPlatformAPI.Data.Repositories;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<SampleActionFilter>();
-//builder.Services.AddScoped<IdActionFilter>();
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 
 // Connect to database
 builder.Services.AddDbContext<DataContext>(options =>
@@ -20,6 +23,9 @@ builder.Services.AddDbContext<DataContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+// this might be BS
+//builder.Services.AddControllers().AddJsonOptions(x =>
+//                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 

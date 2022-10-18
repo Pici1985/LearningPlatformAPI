@@ -1,4 +1,5 @@
-﻿using LearningPlatformAPI.Enums;
+﻿using LearningPlatformAPI.Data.Interfaces;
+using LearningPlatformAPI.Enums;
 using LearningPlatformAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,16 +32,16 @@ namespace LearningPlatformAPI.Data
             return allCourses;
         }
 
-        public bool DoesPersonExist(int userid) 
+        public bool DoesPersonExist(int userid)
         {
             if (Person.Any(i => i.UserId == userid))
-            { 
+            {
                 return true;
             }
             return false;
         }
 
-        public List<AllCourses> GetAvailableCourses(int userid) 
+        public List<AllCourses> GetAvailableCourses(int userid)
         {
             var allcourses = AllCourses.ToList();
 
@@ -60,7 +61,7 @@ namespace LearningPlatformAPI.Data
             return courses;
         }
 
-        public void EnrollOnCourse(CreateEnrollRequest request) 
+        public void EnrollOnCourse(CreateEnrollRequest request)
         {
             //create new enrollment with given user on given course
             MyCourses newCourse = new MyCourses
@@ -128,11 +129,11 @@ namespace LearningPlatformAPI.Data
         //Methods for AuthController
         public Person registerPerson(Person person)
         {
-            var dateOfRegistration = DateTime.Now;          
-             
-            var newPerson = new Person() 
+            var dateOfRegistration = DateTime.Now;
+
+            var newPerson = new Person()
             {
-                FirstName = person.FirstName, 
+                FirstName = person.FirstName,
                 LastName = person.LastName,
                 Email = person.Email,
                 Password = person.Password,
@@ -142,13 +143,13 @@ namespace LearningPlatformAPI.Data
                 DateOfRegistration = dateOfRegistration,
                 Token = person.Token,
             };
-            
+
             Person.Add(newPerson);
             SaveChanges();
 
             return person;
         }
-                
+
         public Person? CheckCredentials(string email, string password)
         {
             return (from p in Person
@@ -156,7 +157,7 @@ namespace LearningPlatformAPI.Data
                     select p).FirstOrDefault();
         }
 
-        public async Task<LoginSuccess> personLoginFunction(Person person) 
+        public async Task<LoginSuccess> personLoginFunction(Person person)
         {
             //generate token 
             Guid token = Guid.NewGuid();
@@ -188,7 +189,7 @@ namespace LearningPlatformAPI.Data
             return loginSuccess;
         }
 
-        public async Task<int> currentStreakCounter(Person person) 
+        public async Task<int> currentStreakCounter(Person person)
         {
             //get distinct dates from db 
             var dates = (from d in UserTriggeredEvent
@@ -263,7 +264,7 @@ namespace LearningPlatformAPI.Data
 
 
         // Methods for CourseSectionController
-        public StartSectionByUser startSectionByUser(CreateSectionRequest request) 
+        public StartSectionByUser startSectionByUser(CreateSectionRequest request)
         {
             var result = new StartSectionByUser() { };
             // check if userid exists
@@ -349,7 +350,7 @@ namespace LearningPlatformAPI.Data
             return result;
         }
 
-        public FinishSectionByUser finishSectionByUser(CreateSectionRequest request) 
+        public FinishSectionByUser finishSectionByUser(CreateSectionRequest request)
         {
             var result = new FinishSectionByUser() { };
 
@@ -449,7 +450,7 @@ namespace LearningPlatformAPI.Data
 
 
         // Methods for LeaderBoardController
-        public UsersNrOfLogins GetUsersNrOfLogins() 
+        public UsersNrOfLogins GetUsersNrOfLogins()
         {
             var getLeadersGroup = (from l in UserTriggeredEvent
                                    where l.UserID > 0 && l.EventID == 1
@@ -498,7 +499,7 @@ namespace LearningPlatformAPI.Data
             foreach (var f in finishedCourseIds)
             {
                 var userfinishedcoursein = new UserFinishedCourseIn() { };
-                                
+
                 var finishedin = ((from x in table
                                    where x.Detail == f.Detail && x.EventID == (int)EventsEnum.FinishCourse && x.UserID == f.UserID
                                    select x.TimeStamp).FirstOrDefault()).Subtract((from y in table
@@ -522,7 +523,7 @@ namespace LearningPlatformAPI.Data
             return result;
         }
 
-        public LeadersOfLongestConsecutiveStreak GetLeadersOfLongestConsecutiveStreak() 
+        public LeadersOfLongestConsecutiveStreak GetLeadersOfLongestConsecutiveStreak()
         {
             //figure out how many users we have
             var allUserIds = (from a in UserTriggeredEvent
@@ -625,7 +626,7 @@ namespace LearningPlatformAPI.Data
             return result;
         }
 
-        public UsersNrOfFinishedCourses GetUsersNrOfFinishedCourses() 
+        public UsersNrOfFinishedCourses GetUsersNrOfFinishedCourses()
         {
             var getLeadersByFinishedCoursesGroup = (from l in UserTriggeredEvent
                                                     where l.UserID > 0 && l.EventID == (int)EventsEnum.FinishCourse
@@ -657,43 +658,43 @@ namespace LearningPlatformAPI.Data
 
 
         // Methods for MyCoursesController
-        public List<MyEnrolledCourses> GetMyCourses(int userid) 
+        public List<MyEnrolledCourses> GetMyCourses(int userid)
         {
             var user = (from u in Person
-                       where u.UserId == userid
-                       select u).FirstOrDefault();
+                        where u.UserId == userid
+                        select u).FirstOrDefault();
 
             var courses = new List<MyEnrolledCourses>();
 
-            if (user == null) 
+            if (user == null)
             {
-                return courses;   
+                return courses;
             }
             courses = (from mycourses in MyCourses
-                           join allcourses in AllCourses on mycourses.CourseID equals allcourses.CourseId
-                           where mycourses.UserID == userid
-                           select new MyEnrolledCourses
-                           {
-                               CourseTitle = allcourses.CourseTitle,
-                               Sections = (from coursesection in CourseSection
-                                           join allsections in AllSections on coursesection.SectionId equals allsections.SectionID
-                                           where coursesection.CourseId == allcourses.CourseId
-                                           select new StartedSection
-                                           {
-                                               CourseSectionID = (from c in CourseSection
-                                                                  where c.SectionId == coursesection.SectionId && c.CourseId == coursesection.CourseId
-                                                                  select c.Id).FirstOrDefault(),
-                                               SectionID = allsections.SectionID,
-                                               Started = UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
-                                                        (int)EventsEnum.StartSection && x.Detail == coursesection.Id).FirstOrDefault() !=
-                                                        null ? UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
-                                                        (int)EventsEnum.StartSection && x.Detail == coursesection.Id).FirstOrDefault().TimeStamp : null,
-                                               Finished = UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
-                                                        (int)EventsEnum.FinishSection && x.Detail == coursesection.Id).FirstOrDefault() !=
-                                                        null ? UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
-                                                        (int)EventsEnum.FinishSection && x.Detail == coursesection.Id).FirstOrDefault().TimeStamp : null,
-                                           }).ToList()
-                           }).ToList();
+                       join allcourses in AllCourses on mycourses.CourseID equals allcourses.CourseId
+                       where mycourses.UserID == userid
+                       select new MyEnrolledCourses
+                       {
+                           CourseTitle = allcourses.CourseTitle,
+                           Sections = (from coursesection in CourseSection
+                                       join allsections in AllSections on coursesection.SectionId equals allsections.SectionID
+                                       where coursesection.CourseId == allcourses.CourseId
+                                       select new StartedSection
+                                       {
+                                           CourseSectionID = (from c in CourseSection
+                                                              where c.SectionId == coursesection.SectionId && c.CourseId == coursesection.CourseId
+                                                              select c.Id).FirstOrDefault(),
+                                           SectionID = allsections.SectionID,
+                                           Started = UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
+                                                    (int)EventsEnum.StartSection && x.Detail == coursesection.Id).FirstOrDefault() !=
+                                                    null ? UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
+                                                    (int)EventsEnum.StartSection && x.Detail == coursesection.Id).FirstOrDefault().TimeStamp : null,
+                                           Finished = UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
+                                                    (int)EventsEnum.FinishSection && x.Detail == coursesection.Id).FirstOrDefault() !=
+                                                    null ? UserTriggeredEvent.Where(x => x.UserID == userid && x.EventID ==
+                                                    (int)EventsEnum.FinishSection && x.Detail == coursesection.Id).FirstOrDefault().TimeStamp : null,
+                                       }).ToList()
+                       }).ToList();
 
             foreach (MyEnrolledCourses mec in courses)
             {
@@ -715,44 +716,46 @@ namespace LearningPlatformAPI.Data
         }
 
 
-        //Methods for PersonController
-        public List<Person> GetAllPersons() 
-        {
-            var person = Person.ToList();
 
-            return person;
-        }
+        ////Methods for PersonController
+        //public List<Person> GetAllPersons()
+        //{
+        //    var person = Person.ToList();
 
-        public Person? GetPerson(int id) 
-        {
-            var person = Person.Find(id);
+        //    return person;
+        //}
 
-            return person;
-        }
+        //public Person? GetPerson(int id)
+        //{
+        //    var person = Person.Find(id);
 
-        public Person PostPerson(Person person) 
-        {
-            Person.Add(person);
-            SaveChanges();
+        //    return person;
+        //}
 
-            return person;
-        }
+        //public Person PostPerson(Person person)
+        //{
+        //    Person.Add(person);
+        //    SaveChanges();
 
-        public Person? DeletePerson(int id) 
-        {
-            var person = Person.Find(id);
+        //    return person;
+        //}
 
-            if(person != null) 
-            { 
-                Person.Remove(person);
-                SaveChanges();
-            }
-            return person;
-        }
+        //public Person? DeletePerson(int id)
+        //{
+        //    var person = Person.Find(id);
 
-        public bool PersonExists(int id)
-        {
-            return (Person?.Any(e => e.UserId == id)).GetValueOrDefault();
-        }
+        //    if (person != null)
+        //    {
+        //        Person.Remove(person);
+        //        SaveChanges();
+        //    }
+        //    return person;
+        //}
+
+        //public bool PersonExists(int id)
+        //{
+        //    return (Person?.Any(e => e.UserId == id)).GetValueOrDefault();
+        //}
     }
 }
+
