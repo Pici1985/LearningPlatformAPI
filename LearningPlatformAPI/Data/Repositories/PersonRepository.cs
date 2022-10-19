@@ -32,7 +32,7 @@ namespace LearningPlatformAPI.Data.Repositories
             return person;
         }      
 
-        public async Task <Person> PostPerson(Person person)
+        public Person PostPerson(Person person)
         {
             _context.Person.Add(person);
             _context.SaveChanges();

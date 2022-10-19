@@ -11,7 +11,7 @@ namespace LearningPlatformAPI.Data.Interfaces
     {
         List<Person> GetAllPersons();
                
-        Task <Person> PostPerson(Person person);
+        Person PostPerson(Person person);
         Task <Person> PutPerson(Person person);
 
         Task <bool> DeletePerson(int id);
