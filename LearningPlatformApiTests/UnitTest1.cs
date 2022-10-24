@@ -61,7 +61,21 @@ namespace LearningPlatformApiTests
             Assert.That(obj.StatusCode, Is.EqualTo(200));
 
             Assert.That(personList.Count, Is.EqualTo(3));
+        }
+        
+        [Test]
+        public void Get_All_Persons_Throws_Exception()
+        {
+            //arrange
+            _personRepository.Setup(repo => repo.GetAllPersons()).Throws(new Exception());
+            _controller = new PersonController(_personRepository.Object);
+
+            //act
+            var result = _controller.Get();
+            var obj = result as ObjectResult;
             
+            //assert
+            Assert.AreEqual(400, obj.StatusCode);
         }
 
         [Test]
@@ -69,10 +83,12 @@ namespace LearningPlatformApiTests
         {
             //arrange
             var person = _fixture.CreateMany<Person>(1).FirstOrDefault();
+
             _personRepository.Setup(repo => repo.PostPerson(person)).Returns(person);
             _controller = new PersonController(_personRepository.Object);
 
             //act
+
             var result = _controller.Post(person);
             var obj = result as ObjectResult;
             
@@ -80,6 +96,52 @@ namespace LearningPlatformApiTests
             Assert.IsNotNull(obj);
 
             Assert.That(obj.StatusCode, Is.EqualTo(200));
+
+        }
+        
+        [Test]
+        public void Post_Person_ModelState_Invalid_Returns_400()
+        {
+            //arrange
+            var person = _fixture.CreateMany<Person>(1).FirstOrDefault();
+            _personRepository.Setup(repo => repo.PostPerson(person)).Returns(person);
+            var controller = new PersonController(_personRepository.Object);
+            controller.ModelState.AddModelError("test", "test");
+            var modelstate = controller.ModelState;
+
+
+            //act
+            //ActionResult result = _controller.Index(new Person());
+
+            var result = controller.Post(person);
+            var obj = result as ObjectResult;
+            
+            //assert            
+            Assert.IsTrue(!modelstate.IsValid);
+
+            Assert.That(obj.StatusCode, Is.EqualTo(400));
+
+            Assert.That(obj.Value, Has.Message.EqualTo("ModelState invalid"));
+
+        }
+        
+
+
+        [Test]
+        public void Post_Person_Returns_Throws_Exception()
+        {
+            //arrange
+            var person = _fixture.CreateMany<Person>(1).FirstOrDefault();
+            _personRepository.Setup(repo => repo.PostPerson(It.IsAny<Person>())).Throws(new Exception());
+            _controller = new PersonController(_personRepository.Object);
+
+            //act
+
+            var result = _controller.Post(person);
+            var obj = result as ObjectResult;
+            
+            //assert          
+            Assert.That(obj.StatusCode, Is.EqualTo(400));
         }
     }
 }

@@ -52,7 +52,7 @@ namespace LearningPlatformAPI.Controllers
                 }
                 else
                 {
-                    return BadRequest();
+                    return BadRequest(new { Message = "ModelState invalid"});
                 }
             }
             catch (Exception ex) 
